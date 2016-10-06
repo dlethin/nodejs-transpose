@@ -1,0 +1,21 @@
+{
+  "name": "nodejs-transpose",
+  "version": "0.0.1",
+  "description": "Provide shiftedBody function to asyncronously log the transposed contents of a url",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dlethin/nodejs-transpose.git"
+  },
+  "keywords": [
+    "transpose"
+  ],
+  "author": "Doug Lethin <dlethin@gmail.com>",
+  "homepage": "https://github.com/dlethin/nodejs-transpose#readme",
+  "dependencies": {
+    "request": "^2.75.0"
+  }
+}
