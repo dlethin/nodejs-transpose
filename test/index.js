@@ -54,8 +54,14 @@ function testTranspose(shiftNum, expectedValue, done) {
   // call test function on our test server
   shiftedBody("http://localhost:" + PORT + "/index.html", shiftNum);
 
+  // TBD without any callbacks or promises, its hard to 
+  // know when http client within shiftedBody has finished receiving
+  // the request.  So we can't directly setup an expect of the buff
+  // with the expected value.  Instead, we just *assume* that eventually
+  // the buf will be the expectedValue, and if not wait an interval to
+  // check again.  Ugg.
   let timer = setInterval(function() { 
-    if (buf == (expectedValue + "\n")) {
+    if (buf === (expectedValue + "\n")) {
       unhook_intercept();
       clearInterval(timer)
       done();
