@@ -37,28 +37,41 @@ server.listen(PORT, function(err) {
   serverStarted = true;
 }); 
 
+/*
+ * A function to test the transposition of characters in the response.
+ * shiftNum - the number of characters to shift
+ * expectedValue - the expectedValue of the server response after
+ *     being transposed
+*/
+function testTranspose(shiftNum, expectedValue, done) {
+  let buf = "";
+
+  // first let's intercept stdout
+  let unhook_intercept = intercept(function(txt) {
+    buf += txt;
+  });
+
+  // call test function on our test server
+  shiftedBody("http://localhost:" + PORT + "/index.html", shiftNum);
+
+  let timer = setInterval(function() { 
+    if (buf == (expectedValue + "\n")) {
+      unhook_intercept();
+      clearInterval(timer)
+      done();
+    }
+  }, 100);
+}
+
 describe("shiftedBody", function() {
 
   it("transpose of 0", function(done) {
-    let buf = '';
+    testTranspose(0, SERVER_RESPONSE, done);
+  });
 
-    // first let's intercept stdout
-    let unhook_intercept = intercept(function(txt) {
-      buf += txt;
-    });
-
-    // call test function on our test server
-    shiftedBody("http://localhost:" + PORT + "/index.html", 0);
-
-    let timer = setInterval(function() { 
-      if (buf == (SERVER_RESPONSE + "\n")) {
-        unhook_intercept();
-        clearInterval(timer)
-        console.log("buf is %s", buf);
-        done();
-      }
-    }, 100);
-  })
+  it("transpose of 1", function(done) {
+    testTranspose(1, TRANSPOSED_SERVER_RESPONSE, done);
+  });
 
   it("non-blocking function", function(done) {
 
@@ -76,7 +89,7 @@ describe("shiftedBody", function() {
         let end = (new Date).getTime();
         let delta = end - start;
 
-        expect(delta).to.be.lt(RESPONSE_DELAY_MS);
+        expect(delta, 'Suspect blocking function?').to.be.lt(RESPONSE_DELAY_MS);
         done();
       }
     }, 100);
