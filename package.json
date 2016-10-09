@@ -4,7 +4,7 @@
   "description": "Provide shiftedBody function to asyncronously log the transposed contents of a url",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node test/index.js"
+    "test": "mocha test  --reporter spec"
   },
   "repository": {
     "type": "git",
@@ -17,5 +17,9 @@
   "homepage": "https://github.com/dlethin/nodejs-transpose#readme",
   "dependencies": {
     "request": "^2.75.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.1.0"
   }
 }
