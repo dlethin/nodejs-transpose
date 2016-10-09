@@ -4,43 +4,63 @@ const
   PORT = 5001,
   RESPONSE_DELAY_MS = 100,
 
+  SERVER_RESPONSE="ABCabc123",
+  TRANSPOSED_SERVER_RESPONSE = "BCDbcd234",
+
   http = require('http'),
   expect  = require("chai").expect,
-  
-  // function to test
-  shiftedBody = require('../lib/index.js').shiftedBody;
+  intercept = require("intercept-stdout"),
+
+// function to test
+shiftedBody = require('../lib/index.js').shiftedBody;
+
+//Create a test server to server some content
+let server = http.createServer(function(req, res) {
+
+  // wait a bit before sending the response
+  setTimeout(function() {
+    res.end(SERVER_RESPONSE);
+  }, RESPONSE_DELAY_MS);
+});
+
+let serverStarted = false;
+
+//Lets start our server
+server.listen(PORT, function(err) {
+
+  if (err) {
+    throw err;
+  }
+
+  //Callback triggered when server is successfully listening. Hurray!
+  //console.log("Server listening on: http://localhost:%s", PORT);
+  serverStarted = true;
+}); 
 
 describe("shiftedBody", function() {
-  it("non-blocking function", function(done) {
 
-    // note since shiftedBody function writes to 
-    // stdout, we can't (or at least I haven't thought
-    // of a way yet) we can't easily test that the
-    // transposition is correct.  We're ONLY testing
-    // that the function is non-blocking
+  it("transpose of 0", function(done) {
+    let buf = '';
 
-    //Create a test server to server some content
-    let server = http.createServer(function(req, res) {
-
-      // wait a bit before sending the response
-      setTimeout(function() {
-        res.end('Finally...');
-      }, RESPONSE_DELAY_MS);
+    // first let's intercept stdout
+    let unhook_intercept = intercept(function(txt) {
+      buf += txt;
     });
 
-    let serverStarted = false;
+    // call test function on our test server
+    shiftedBody("http://localhost:" + PORT + "/index.html", 0);
 
-    //Lets start our server
-    server.listen(PORT, function(err) {
-
-      if (err) {
-        throw err;
+    let timer = setInterval(function() { 
+      if (buf == (SERVER_RESPONSE + "\n")) {
+        unhook_intercept();
+        clearInterval(timer)
+        console.log("buf is %s", buf);
+        done();
       }
+    }, 100);
+  })
 
-      //Callback triggered when server is successfully listening. Hurray!
-      //console.log("Server listening on: http://localhost:%s", PORT);
-      serverStarted = true;
-    }); 
+  it("non-blocking function", function(done) {
 
     // check in intervals if the server has been started
     let timer = setInterval(function() { 

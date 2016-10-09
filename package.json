@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "intercept-stdout": "^0.1.2",
     "mocha": "^3.1.0"
   }
 }
