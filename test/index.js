@@ -7,12 +7,12 @@ const
   SERVER_RESPONSE="ABCabc123",
   TRANSPOSED_SERVER_RESPONSE = "BCDbcd234",
 
-  http = require('http'),
+  http = require("http"),
   expect  = require("chai").expect,
   intercept = require("intercept-stdout"),
 
-// function to test
-shiftedBody = require('../lib/index.js').shiftedBody;
+  // function to test
+  shiftedBody = require("../lib/index.js").shiftedBody;
 
 //Create a test server to server some content
 let server = http.createServer(function(req, res) {
@@ -63,7 +63,7 @@ function testTranspose(shiftNum, expectedValue, done) {
   let timer = setInterval(function() { 
     if (buf === (expectedValue + "\n")) {
       unhook_intercept();
-      clearInterval(timer)
+      clearInterval(timer);
       done();
     }
   }, 100);
@@ -95,7 +95,7 @@ describe("shiftedBody", function() {
         let end = (new Date).getTime();
         let delta = end - start;
 
-        expect(delta, 'Suspect blocking function?').to.be.lt(RESPONSE_DELAY_MS);
+        expect(delta, "Suspect blocking function?").to.be.lt(RESPONSE_DELAY_MS);
         done();
       }
     }, 100);
