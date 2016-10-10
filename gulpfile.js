@@ -1,5 +1,12 @@
-const gulp = require("gulp");
-const eslint = require("gulp-eslint");
+"use strict";
+
+const
+  gulp = require("gulp"),
+  eslint = require("gulp-eslint");
+
+// don't need a ref to guppy -- only need to get it loaded
+// and install the proper git hooks
+require("git-guppy")(gulp),
  
 gulp.task("lint", () => {
     // ESLint ignores files with "node_modules" paths. 
@@ -17,7 +24,7 @@ gulp.task("lint", () => {
         // lint error, return the stream and pipe to failAfterError last. 
         .pipe(eslint.failAfterError());
 });
- 
-gulp.task("default", ["lint"], function () {
-    // This will only run if the lint task is successful... 
-});
+
+gulp.task("pre-commit", ["lint"]);
+
+gulp.task("default", ["lint"]);

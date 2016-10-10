@@ -21,6 +21,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^3.7.1",
+    "git-guppy": "^1.2.1",
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "intercept-stdout": "^0.1.2",
