@@ -15,10 +15,10 @@ const
   shiftedBody = require("../lib/index.js").shiftedBody;
 
 //Create a test server to server some content
-let server = http.createServer(function(req, res) {
+let server = http.createServer((req, res) => {
 
   // wait a bit before sending the response
-  setTimeout(function() {
+  setTimeout(() => {
     res.end(SERVER_RESPONSE);
   }, RESPONSE_DELAY_MS);
 });
@@ -26,7 +26,7 @@ let server = http.createServer(function(req, res) {
 let serverStarted = false;
 
 //Lets start our server
-server.listen(PORT, function(err) {
+server.listen(PORT, err => {
 
   if (err) {
     throw err;
@@ -40,49 +40,63 @@ server.listen(PORT, function(err) {
 /*
  * A function to test the transposition of characters in the response.
  * shiftNum - the number of characters to shift
- * expectedValue - the expectedValue of the server response after
- *     being transposed
+ *
+ * will return buf which was captured by intercepting standard out 
 */
-function testTranspose(shiftNum, expectedValue, done) {
+const wrapTranspose = (shiftNum) => {
+
   let buf = "";
 
   // first let's intercept stdout
-  let unhook_intercept = intercept(function(txt) {
+  let unhook_intercept = intercept(txt => {
     buf += txt;
   });
 
-  // call test function on our test server
-  shiftedBody("http://localhost:" + PORT + "/index.html", shiftNum);
+  return new Promise((resolve, reject) => {
 
-  // TBD without any callbacks or promises, its hard to 
-  // know when http client within shiftedBody has finished receiving
-  // the request.  So we can't directly setup an expect of the buff
-  // with the expected value.  Instead, we just *assume* that eventually
-  // the buf will be the expectedValue, and if not wait an interval to
-  // check again.  Ugg.
-  let timer = setInterval(function() { 
-    if (buf === (expectedValue + "\n")) {
+    // call test function on our test server
+    shiftedBody("http://localhost:" + PORT + "/index.html", shiftNum)
+    .then(() => {
       unhook_intercept();
-      clearInterval(timer);
-      done();
-    }
-  }, 100);
-}
+      resolve(buf);
+    })
+    .catch(err => {
+      unhook_intercept();
+      reject(err);
+    });
+  });
+};
 
-describe("shiftedBody", function() {
+describe("shiftedBody", () => {
 
-  it("transpose of 0", function(done) {
-    testTranspose(0, SERVER_RESPONSE, done);
+  it("transpose of 0", done =>  {
+    wrapTranspose(0).then(buf => {
+      console.log(buf);
+      try {
+        expect(buf, "unexpected response").to.equal(`${SERVER_RESPONSE}\n`);
+        done();
+      } catch (e) {
+        done(e);
+      }
+    });
   });
 
-  it("transpose of 1", function(done) {
-    testTranspose(1, TRANSPOSED_SERVER_RESPONSE, done);
+  it("transpose of 1", done =>  {
+    wrapTranspose(1).then(buf => {
+      console.log(buf);
+      try {
+        expect(buf, "unexpected response").to.equal(`${TRANSPOSED_SERVER_RESPONSE}\n`);
+        done();
+      } catch (e) {
+        done(e);
+      }
+    });
   });
 
-  it("non-blocking function", function(done) {
+  it("non-blocking function", done => {
 
     // check in intervals if the server has been started
-    let timer = setInterval(function() { 
+    let timer = setInterval(() => { 
       if (serverStarted) {
         clearInterval(timer);
 
